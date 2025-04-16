@@ -15,3 +15,26 @@ variables:
 steps:
 - script: dotnet build --configuration $(buildConfiguration)
   displayName: 'dotnet build $(buildConfiguration)'
+- task: NuGetToolInstaller@1
+  inputs:
+    versionSpec: 
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'restore'
+    projects: 'https://github.com/chrehman/WebAppWithDatabaseDemo'
+    feedsToUse: 'select'
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'publish'
+    publishWebProjects: true
+    arguments: '--no-restore -c release -o $(build.binariesDirectory)'
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: '$(Build.binariesdirectory)\'
+    Contents: '**'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
